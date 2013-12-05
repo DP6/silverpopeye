@@ -9,38 +9,30 @@ import requests
 class EngageApi(object):
     ENVELOPE_TEMPLATE = etree.XML(u'<Envelope><Body></Body></Envelope>')
 
-    def __init__(self, api_endpoint, ftp_endpoint=None):
-        """.
-
-        parameters
-            -api_endpoint: str ou unicode with the URL of the endpoint used
-            by you account.
-            -ftp_endpoint: str ou unicode with the URL of the endpoint used
-            by you account."""
+    def __init__(self, api_endpoint):
         self.api_endpoint = api_endpoint
-        self.ftp_endpoint = ftp_endpoint
-        #self.encoding = None
+        self.encoding = None
         self.jsessionid = ''
 
     def setEncoding(self, encoding):
-        """Set the encondig pass to the request. If enconding isn't defined,
+        """Set the encondig to be passed to request. If enconding isn't defined,
         the Silverpop Organization's default setting is used.
 
-        parameters
-            -encoding: str ou unicode representinf enconding information like 
-            in Content-Type Header(e.g. "UTF-8")"""
+        -encoding: str ou unicode representing enconde information like 
+        in Content-Type Header(e.g. "UTF-8")"""
         self.encoding = encoding
 
     def __envelope(self):
-        """Returns the base XML body of a Silverpop's request
-
-        return type: ElementTree"""
+        """Returns a etree.XML object with the base body of a Silverpop's request"""
         return deepcopy(self.ENVELOPE_TEMPLATE)
 
-    def __post(self, xml, encoding=None):
+    def __get(self, xml):
+        pass
+
+    def __post(self, xml):
         data = {'xml': xml}
         headers = {}
-        if encoding:
+        if self.encoding:
             headers['Content-Type'] = 'text/xml;charset={encoding}'.format(encoding=encoding)
         url = 'https://{api_endpoint};jsessionid={jsessionid}'.format(api_endpoint=self.api_endpoint, jsessionid=self.jsessionid)
         response = requests.post(url, data=data, headers=headers)
@@ -58,37 +50,41 @@ class EngageApi(object):
     def __getSessionId(self, xml):
         return xml.xpath('//SESSIONID/text()')[0]
 
-    def __buildAction(self, action, **parameters):
+    def __buildAction(self, action, **optionals):
         requestEnvelope = self.__envelope()
         body = requestEnvelope.xpath('Body')[0]
         actionElement = etree.SubElement(body, action)
-        for name, value in parameters.items():
-            etree.SubElement(actionElement, name).text = value
+        for name, value in optionals.items():
+            element = etree.SubElement(actionElement, name)
+            if not value:
+                continue
+            element.text = value
         xml = etree.tostring(requestEnvelope)
         return xml
 
     def login(self, username, password):
-        parameters = {'USERNAME': username,
+        optionals = {'USERNAME': username,
                         'PASSWORD': password,}
-        xml = self.__buildAction('Login', **parameters)
+        xml = self.__buildAction('Login', **optionals)
         responseEnvelope = self.__post(xml)
         self.jsessionid = self.__getSessionId(responseEnvelope)
 
     def logout(self):
-        parameters = {}
-        xml = self.__buildAction('Logout', **parameters)
+        optionals = {}
+        xml = self.__buildAction('Logout', **optionals)
         responseEnvelope = self.__post(xml)
         self.jsessionid = ''
 
-    def getAggregateTrackingForUser(self, dateStart, dateEnd, **parameters):
-        parameters = {'DATE_START': dateStart,
-                        'DATE_END': dateEnd,}
-        xml = self.__buildAction('GetAggregateTrackingForUser', **parameters)
+    def getAggregateTrackingForUser(self, dateStart, dateEnd, **optionals):
+        optionals['DATE_START'] = dateStart
+        optionals['DATE_END'] = dateEnd
+        xml = self.__buildAction('GetAggregateTrackingForUser', **optionals)
         responseEnvelope = self.__post(xml)
         return responseEnvelope
 
-    def getMailingTemplates(self, visibility, **parameters):
-        parameters = {'VISIBILITY': visibility,}
-        xml = self.__buildAction('GetMailingTemplates', **parameters)
+    def getMailingTemplates(self, visibility, **optionals):
+        optionals['VISIBILITY'] = visibility
+        xml = self.__buildAction('GetMailingTemplates', **optionals)
         responseEnvelope = self.__post(xml)
         return responseEnvelope
+        
