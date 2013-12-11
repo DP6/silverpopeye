@@ -3,3 +3,6 @@ CHANGE.txt
 README.txt
 setup.py
 silverpopeye/__init__.py
+silverpopeye/engage/__init__.py
+silverpopeye/engage/api.py
+silverpopeye/engage/exceptions.py

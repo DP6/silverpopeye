@@ -2,10 +2,10 @@ from distutils.core import setup
 
 setup(
     name='silverpopeye',
-    version='0.1.1',
+    version='0.1.0',
     author='Sidnei Pereira',
     author_email='sidnei.pereira@dp6.com.br',
-    packages=['silverpopeye'],
+    packages=['silverpopeye', 'silverpopeye.engage'], 
     url='http://pypi.python.org/pypi/silverpopeye/',
     license='LICENSE.txt',
     description='Python client library for Silverpop\'s API.',
