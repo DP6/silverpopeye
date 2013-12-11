@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='silverpopeye',
-    version='0.1.0',
+    version='0.1.1',
     author='Sidnei Pereira',
     author_email='sidnei.pereira@dp6.com.br',
     packages=['silverpopeye'],
